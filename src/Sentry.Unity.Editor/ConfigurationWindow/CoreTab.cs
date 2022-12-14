@@ -28,6 +28,11 @@ namespace Sentry.Unity.Editor.ConfigurationWindow
                                                         "they are more frequent than once per second."),
                 options.EnableLogDebouncing);
 
+            options.TreatExceptionsAsHandled = EditorGUILayout.Toggle(
+                new GUIContent("Exceptions as handled", "The SDK marks all exceptions as handled "
+                    + "to not mark sessions as crashed because unity survives and do not crash."),
+                options.TreatExceptionsAsHandled);
+
             EditorGUILayout.Space();
             EditorGUI.DrawRect(EditorGUILayout.GetControlRect(false, 1), Color.gray);
             EditorGUILayout.Space();

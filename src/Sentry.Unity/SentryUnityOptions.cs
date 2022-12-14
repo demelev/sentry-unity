@@ -40,6 +40,10 @@ namespace Sentry.Unity
         /// Whether Sentry events should be debounced it too frequent.
         /// </summary>
         public bool EnableLogDebouncing { get; set; } = false;
+        public Action<string, LogType, Action<string, LogType>>? Debouncer { get; set; }
+        public bool TreatExceptionsAsHandled { get; set; } = false;
+        public bool IsExceptionHandled(Exception ex) => IsExceptionHandledCheck?.Invoke(ex) ?? TreatExceptionsAsHandled;
+        public Func<Exception, bool>? IsExceptionHandledCheck { get; set; }
 
         private CompressionLevelWithAuto _requestBodyCompressionLevel = CompressionLevelWithAuto.Auto;
 

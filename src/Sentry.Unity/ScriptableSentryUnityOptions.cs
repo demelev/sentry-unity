@@ -28,6 +28,8 @@ namespace Sentry.Unity
         [field: SerializeField] public string? Dsn { get; set; }
         [field: SerializeField] public bool CaptureInEditor { get; set; } = true;
         [field: SerializeField] public bool EnableLogDebouncing { get; set; } = false;
+        [field: SerializeField] public bool TreatExceptionsAsHandled { get; set; } = false;
+
         [field: SerializeField] public double TracesSampleRate { get; set; } = 0;
 
         [field: SerializeField] public bool PerformanceAutoInstrumentationEnabled { get; set; } = false;
@@ -112,6 +114,7 @@ namespace Sentry.Unity
                 Dsn = Dsn,
                 CaptureInEditor = CaptureInEditor,
                 EnableLogDebouncing = EnableLogDebouncing,
+                TreatExceptionsAsHandled = TreatExceptionsAsHandled,
                 TracesSampleRate = TracesSampleRate,
                 AutoSessionTracking = AutoSessionTracking,
                 AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(AutoSessionTrackingInterval),
