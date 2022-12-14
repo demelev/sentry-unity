@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sentry.Extensibility;
 using Sentry.Integrations;
 using Sentry.Protocol;
@@ -45,6 +46,14 @@ namespace Sentry.Unity.Integrations
                 return;
             }
 
+            if (_sentryOptions != null)
+            {
+                if (_sentryOptions.UseExperimentalDebouncer)
+                    _sentryOptions.Debouncer = new FlashbackDebouncer().Debounce;
+                else
+                    _sentryOptions.Debouncer = DefaultDebouncer;
+            }
+
             _unityLogHandler = Debug.unityLogger.logHandler;
             Debug.unityLogger.logHandler = this;
 
@@ -71,20 +80,7 @@ namespace Sentry.Unity.Integrations
                 return;
             }
 
-            // TODO: Capture the context (i.e. grab the name if != null and set it as context)
-
-            // NOTE: This might not be entirely true, as a user could as well call `Debug.LogException`
-            // and expect a handled exception but it is not possible for us to differentiate
-            // https://docs.sentry.io/platforms/unity/troubleshooting/#unhandled-exceptions---debuglogexception
-            exception.Data[Mechanism.HandledKey] = false;
-            exception.Data[Mechanism.MechanismKey] = "Unity.LogException";
-            _ = _hub.CaptureException(exception);
-
-            if (_sentryOptions?.AddBreadcrumbsForLogType[LogType.Exception] is true)
-            {
-                // So the next event includes this error as a breadcrumb
-                _hub.AddBreadcrumb(message: $"{exception.GetType()}: {exception.Message}", category: "unity.logger", level: BreadcrumbLevel.Error);
-            }
+            CaptureLogFormat(LogType.Exception, context, "{0}", $"{exception.GetType()}: {exception.Message}", exception);
         }
 
         public void LogFormat(LogType logType, UnityEngine.Object? context, string format, params object[] args)
@@ -113,34 +109,61 @@ namespace Sentry.Unity.Integrations
                 return;
             }
 
-            if (_sentryOptions?.EnableLogDebouncing is true)
+            if (args[0] is not string logMessage)
             {
-                var debounced = logType switch
-                {
-                    LogType.Error or LogType.Exception or LogType.Assert => ErrorTimeDebounce.Debounced(),
-                    LogType.Log => LogTimeDebounce.Debounced(),
-                    LogType.Warning => WarningTimeDebounce.Debounced(),
-                    _ => true
-                };
+                return;
+            }
 
-                if (!debounced)
+            if (logType == LogType.Exception && args.Length < 2)
+            {
+                return;
+            }
+            // We're not capturing SDK internal logs
+            if (logMessage.StartsWith(UnityLogger.LogPrefix, StringComparison.Ordinal))
+            {
+                // TODO: Maybe color Sentry internal logs (highlight 'Sentry'?)
+                return;
+            }
+
+            void Capture(string logMessage, LogType logType, bool OnlyBreadcrumbs = false)
+            {
+                if (logType is LogType.Exception && !OnlyBreadcrumbs)
                 {
-                    return;
+                    if (args[1] is Exception exception)
+                    {
+                        // TODO: Capture the context (i.e. grab the name if != null and set it as context)
+
+                        // NOTE: This might not be entirely true, as a user could as well call `Debug.LogException`
+                        // and expect a handled exception but it is not possible for us to differentiate
+                        // https://docs.sentry.io/platforms/unity/troubleshooting/#unhandled-exceptions---debuglogexception
+
+                        exception.Data[Mechanism.HandledKey] = _sentryOptions?.IsExceptionHandled(exception) ?? false;
+                        exception.Data[Mechanism.MechanismKey] = "Unity.LogException";
+
+                        _ = _hub.CaptureException(exception);
+                    }
+                }
+
+                if (logType is LogType.Error or LogType.Assert && !OnlyBreadcrumbs)
+                {
+                    _hub.CaptureMessage(logMessage, ToEventTagType(logType));
+                }
+
+                if (_sentryOptions?.AddBreadcrumbsForLogType[logType] is true)
+                {
+                    // So the next event includes this as a breadcrumb
+                    _hub.AddBreadcrumb(message: logMessage, category: "unity.logger", level: ToBreadcrumbLevel(logType));
                 }
             }
 
             var logMessage = args.Length == 0 ? format : string.Format(format, args);
-
-            if (logType is LogType.Error or LogType.Assert)
+            if (_sentryOptions?.EnableLogDebouncing is true && _sentryOptions?.Debouncer != null)
             {
-                // TODO: Capture the context (i.e. grab the name if != null and set it as context)
-                _hub.CaptureMessage(logMessage, ToEventTagType(logType));
+                _sentryOptions.Debouncer(logMessage, logType, Capture);
             }
-
-            if (_sentryOptions?.AddBreadcrumbsForLogType[logType] is true)
+            else
             {
-                // So the next event includes this as a breadcrumb
-                _hub.AddBreadcrumb(message: logMessage, category: "unity.logger", level: ToBreadcrumbLevel(logType));
+                Capture(logMessage, logType);
             }
         }
 
@@ -181,5 +204,21 @@ namespace Sentry.Unity.Integrations
                 LogType.Warning => BreadcrumbLevel.Warning,
                 _ => BreadcrumbLevel.Info
             };
+
+        internal void DefaultDebouncer(string message, LogType logType, DebouncerCaptureCallback capture)
+        {
+            var debounced = logType switch
+            {
+                LogType.Error or LogType.Exception or LogType.Assert => ErrorTimeDebounce.Debounced(),
+                LogType.Log => LogTimeDebounce.Debounced(),
+                LogType.Warning => WarningTimeDebounce.Debounced(),
+                _ => true
+            };
+
+            if (debounced)
+            {
+                capture(message, logType, AsBreadcrumbsOnly: false);
+            }
+        }
     }
 }
