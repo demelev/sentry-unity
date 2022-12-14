@@ -1,3 +1,4 @@
+using System;
 using Sentry.Extensibility;
 using Sentry.Unity.Integrations;
 
@@ -74,6 +75,8 @@ public static class SentryUnityOptionsExtensions
             options.DiagnosticLogger?.LogWarning("Failed to find required IL2CPP methods - Skipping line number support");
         }
     }
+
+    public static bool IsExceptionHandled(this SentryUnityOptions options, Exception ex) => options.IsExceptionHandledCheck?.Invoke(ex) ?? options.TreatExceptionsAsHandled;
 
     /// <summary>
     /// Disables the capture of errors through <see cref="UnityLogHandlerIntegration"/>.

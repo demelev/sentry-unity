@@ -24,6 +24,11 @@ internal static class CoreTab
             options.CaptureInEditor = EditorGUILayout.Toggle(
                 new GUIContent("Capture In Editor", "Capture errors while running in the Editor."),
                 options.CaptureInEditor);
+
+            options.TreatExceptionsAsHandled = EditorGUILayout.Toggle(
+                new GUIContent("Exceptions as handled", "The SDK marks all exceptions as handled "
+                    + "to not mark sessions as crashed because unity survives and do not crash."),
+                options.TreatExceptionsAsHandled);
         }
 
         EditorGUILayout.Space();
@@ -58,6 +63,11 @@ internal static class CoreTab
                 new GUIContent("Enable Log Debouncing", "The SDK debounces log messages of the " +
                                                         "same type if they are more frequent than once per second."),
                 options.EnableLogDebouncing);
+
+            options.UseExperimentalDebouncer = EditorGUILayout.Toggle(
+                new GUIContent("Use Flashback Debouncer", "The SDK will use experimental debouncer instead of plain TimeDebounce" +
+                                                        " debouncing repeating messages by message and LogType instead of only LogType."),
+                options.UseExperimentalDebouncer);
 
             options.DebounceTimeLog = EditorGUILayout.IntField(
                 new GUIContent("Log Debounce [ms]", "The time that has to pass between events of " +

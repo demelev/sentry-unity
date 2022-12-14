@@ -28,6 +28,7 @@ public class ScriptableSentryUnityOptions : ScriptableObject
 
     [field: SerializeField] public string? Dsn { get; set; }
     [field: SerializeField] public bool CaptureInEditor { get; set; } = true;
+    [field: SerializeField] public bool TreatExceptionsAsHandled { get; set; } = false;
 
     [field: SerializeField] public bool EnableLogDebouncing { get; set; } = false;
     [field: SerializeField] public int DebounceTimeLog { get; set; } = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
@@ -142,6 +143,7 @@ public class ScriptableSentryUnityOptions : ScriptableObject
             DebounceTimeLog = TimeSpan.FromMilliseconds(DebounceTimeLog),
             DebounceTimeWarning = TimeSpan.FromMilliseconds(DebounceTimeWarning),
             DebounceTimeError = TimeSpan.FromMilliseconds(DebounceTimeError),
+            TreatExceptionsAsHandled = TreatExceptionsAsHandled,
             TracesSampleRate = TracesSampleRate,
             AutoStartupTraces = AutoStartupTraces,
             AutoSceneLoadTraces = AutoSceneLoadTraces,

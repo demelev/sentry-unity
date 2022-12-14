@@ -17,6 +17,9 @@ namespace Sentry.Unity;
 /// </remarks>
 public sealed class SentryUnityOptions : SentryOptions
 {
+    public delegate void DebouncerCaptureCallback(string logMessage, LogType logType, bool AsBreadcrumbsOnly);
+    public delegate void DebouncerFunction(string logMessage, LogType logType, DebouncerCaptureCallback capture);
+
     /// <summary>
     /// UPM name of Sentry Unity SDK (package.json)
     /// </summary>
@@ -47,6 +50,11 @@ public sealed class SentryUnityOptions : SentryOptions
     public bool CaptureInEditor { get; set; } = true;
 
     /// <summary>
+    /// Whether Sentry should mark all exceptions as handled.
+    /// </summary>
+    public bool TreatExceptionsAsHandled { get; set; } = false;
+
+    /// <summary>
     /// Whether Sentry events should be debounced it too frequent.
     /// </summary>
     public bool EnableLogDebouncing { get; set; } = false;
@@ -66,6 +74,22 @@ public sealed class SentryUnityOptions : SentryOptions
     /// </summary>
     public TimeSpan DebounceTimeError { get; set; } = TimeSpan.FromSeconds(1);
 
+    /// <summary>
+    /// Custom function determines whether an exception should be makerd as handled.
+    /// </summary>
+    public Func<Exception, bool>? IsExceptionHandledCheck { get; set; }
+
+    /// <summary>
+    /// Whether Sentry should use experimental FlashbackDebouncer instead of
+    /// plain TimeDebounce.
+    /// </summary>
+    public bool UseExperimentalDebouncer { get; set; } = false;
+
+    /// <summary>
+    /// Assing a custom debouncer if you need, otherwise the default one
+    /// will be used.
+    /// </summary>
+    public DebouncerFunction? Debouncer { get; set; }
 
     private CompressionLevelWithAuto _requestBodyCompressionLevel = CompressionLevelWithAuto.Auto;
 
