@@ -9,6 +9,9 @@ using CompressionLevel = System.IO.Compression.CompressionLevel;
 
 namespace Sentry.Unity
 {
+    public delegate void DebouncerCaptureCallback(string logMessage, LogType logType, bool AsBreadcrumbsOnly);
+    public delegate void DebouncerFunction(string logMessage, LogType logType, DebouncerCaptureCallback capture);
+
     /// <summary>
     /// Sentry Unity Options.
     /// </summary>
@@ -37,9 +40,31 @@ namespace Sentry.Unity
         public bool CaptureInEditor { get; set; } = true;
 
         /// <summary>
+        /// Whether Sentry should mark all exceptions as handled.
+        /// </summary>
+        public bool TreatExceptionsAsHandled { get; set; } = false;
+
+        /// <summary>
         /// Whether Sentry events should be debounced it too frequent.
         /// </summary>
         public bool EnableLogDebouncing { get; set; } = false;
+
+        /// <summary>
+        /// Custom function determines whether an exception should be makerd as handled.
+        /// </summary>
+        public Func<Exception, bool>? IsExceptionHandledCheck { get; set; }
+
+        /// <summary>
+        /// Whether Sentry should use experimental FlashbackDebouncer instead of
+        /// plain TimeDebounce.
+        /// </summary>
+        public bool UseExperimentalDebouncer { get; set; } = false;
+
+        /// <summary>
+        /// Assing a custom debouncer if you need, otherwise the default one
+        /// will be used.
+        /// </summary>
+        public DebouncerFunction? Debouncer { get; set; }
 
         private CompressionLevelWithAuto _requestBodyCompressionLevel = CompressionLevelWithAuto.Auto;
 

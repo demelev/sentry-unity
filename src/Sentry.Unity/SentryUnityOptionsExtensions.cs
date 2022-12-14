@@ -1,3 +1,4 @@
+using System;
 using Sentry.Extensibility;
 using Sentry.Unity.Integrations;
 
@@ -87,5 +88,7 @@ namespace Sentry.Unity
         /// </summary>
         public static void DisableAnrIntegration(this SentryUnityOptions options) =>
             options.RemoveIntegration<AnrIntegration>();
+
+        public static bool IsExceptionHandled(this SentryUnityOptions options, Exception ex) => options.IsExceptionHandledCheck?.Invoke(ex) ?? options.TreatExceptionsAsHandled;
     }
 }
