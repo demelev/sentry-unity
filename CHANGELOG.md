@@ -4,6 +4,10 @@
 
 ### Features
 
+- Implementing better Debug.Log debouncer (#)
+
+- Adds option to TreatExceptionsAsHandled
+
 - Mono PDB files upload during build ([#1106](https://github.com/getsentry/sentry-unity/pull/1106))
 
 ### Dependencies
