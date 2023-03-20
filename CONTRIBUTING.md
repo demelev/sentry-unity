@@ -27,11 +27,11 @@ dotnet tool install --global PowerShell
 ### Setup for building the Java SDK
 
 * Install Git and ensure is accessible from the PATH
-* Install Java 11
-  * [Using sdkman](https://sdkman.io/) which manage versions for you. (i.e. `sdk install java 11.0.15-ms`)
+* Install Java 17
+  * [Using sdkman](https://sdkman.io/) which manage versions for you. (i.e. `sdk install java 17.0.5-ms`)
   * Or [download the OpenJDK](https://openjdk.java.net/install/) directly.
 * Add JAVA_HOME to your environment variables (if not using sdkman):
-  * Windows: `setx JAVA_HOME "C:\Program Files\Java\jdk-11.0.11"`
+  * Windows: `setx JAVA_HOME "C:\Program Files\Java\jdk-17.0.5"`
 * Install [Android Studio](https://developer.android.com/studio)
   * Open Android Studio and go to Customize -> All settings...
   * Search for "SDK" in the Seachbar
@@ -39,10 +39,10 @@ dotnet tool install --global PowerShell
   * Install the Android SDK
   * Swap tab to SDK Tools
   * Check "Show Package Details"
-  * Under Android SDK Build-Tools check "30.0.2"
+  * Under Android SDK Build-Tools check "30.0.3"
   * Apply
-* Add ANDROID_SDK_ROOT to your environment variables
-  * macOS zsh: `export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"`
+* Add ANDROID_HOME to your environment variables
+  * macOS zsh: `export ANDROID_HOME="$HOME/Library/Android/sdk"`
   * Windows: `setx ANDROID_HOME "C:\Program Files (x86)\Android\android-sdk"` for a machine wide install, `setx ANDROID_HOME "%localappdata%\Android\Sdk"` for a user level install.
 
 ### Setup for building the Cocoa SDK
@@ -140,7 +140,7 @@ Let's outline the needed steps for `UPM` package development flow
     * `Runtime` - `Sentry.Unity.Tests.dll`
 * open `samples/unity-of-bugs` project in `Unity`, then `Scenes/BugFarmScene` scene
 * configure `Sentry Unity (dev)` package
-  * on the tab `Tools`, select `Sentry` and insert your `DSN` or [Sentry SDK](https://sentry.io/settings/sentry-sdks/projects/sentry-unity/) one `https://94677106febe46b88b9b9ae5efd18a00@o447951.ingest.sentry.io/5439417`
+  * on the tab `Tools`, select `Sentry` and insert your `DSN` or [Sentry SDK](https://sentry.io/settings/sentry-sdks/projects/sentry-unity/) one `https://e9ee299dbf554dfd930bc5f3c90d5d4b@o447951.ingest.sentry.io/4504604988538880`
   * configure other settings for your needs
 * run the project in `Unity` via clicking `Play`
 * click `ThrowNull` or any other button and check errors in `Sentry` web UI

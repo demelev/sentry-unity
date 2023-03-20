@@ -8,10 +8,10 @@ switch ($name) {
         return "2019.4.40f1"
     }
     "unity2020" {
-        return "2020.3.42f1"
+        return "2020.3.46f1"
     }
     "unity2021" {
-        return "2021.3.15f1"
+        return "2021.3.20f1"
     }
     "unity2022" {
         return "2022.1.23f1"

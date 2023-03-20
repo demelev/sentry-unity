@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 
 namespace Sentry.Unity.Tests
 {
-    public sealed class IntegrationTests : DisabledSelfInitializationTests
+    public sealed class IntegrationTests
     {
         private TestHttpClientHandler _testHttpClientHandler = null!; // Set in Setup
         private readonly TimeSpan _eventReceiveTimeout = TimeSpan.FromSeconds(1);
@@ -18,13 +18,21 @@ namespace Sentry.Unity.Tests
         private string _eventMessage = null!; // Set in setup
         private string _identifyingEventValueAttribute = null!; // Set in setup
 
-        // [SetUp] gets called after disabling the self initialization in the IPrebuildSetup
         [SetUp]
-        public new void Setup()
+        public void SetUp()
         {
             _testHttpClientHandler = new TestHttpClientHandler("SetupTestHttpClientHandler");
             _eventMessage = Guid.NewGuid() + " Test Event";
             _identifyingEventValueAttribute = CreateAttribute("value", _eventMessage);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (SentrySdk.IsEnabled)
+            {
+                SentryUnity.Close();
+            }
         }
 
         [UnityTest]
@@ -321,7 +329,7 @@ namespace Sentry.Unity.Tests
         {
             SentryUnity.Init(options =>
             {
-                options.Dsn = "https://94677106febe46b88b9b9ae5efd18a00@o447951.ingest.sentry.io/5439417";
+                options.Dsn = "https://e9ee299dbf554dfd930bc5f3c90d5d4b@o447951.ingest.sentry.io/4504604988538880";
                 options.CreateHttpClientHandler = () => _testHttpClientHandler;
 
                 configure?.Invoke(options);

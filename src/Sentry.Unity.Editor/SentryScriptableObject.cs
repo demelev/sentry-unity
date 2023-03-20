@@ -28,7 +28,7 @@ namespace Sentry.Unity.Editor
         private static ScriptableSentryUnityOptions? LoadOptions() =>
             Load<ScriptableSentryUnityOptions>(ScriptableSentryUnityOptions.GetConfigPath());
 
-        internal static (SentryUnityOptions?, SentryCliOptions?) ConfiguredBuildtimeOptions()
+        internal static (SentryUnityOptions?, SentryCliOptions?) ConfiguredBuildTimeOptions()
         {
             var scriptableOptions = LoadOptions();
             var cliOptions = LoadCliOptions();
@@ -37,10 +37,13 @@ namespace Sentry.Unity.Editor
             if (scriptableOptions is not null)
             {
                 options = scriptableOptions.ToSentryUnityOptions(isBuilding: true);
-                /// Must be non-nullable in the interface otherwise Unity script compilation fails...
+                // Must be non-nullable in the interface otherwise Unity script compilation fails...
                 cliOptions ??= ScriptableObject.CreateInstance<SentryCliOptions>();
-                var setupScript = scriptableOptions.BuildtimeOptionsConfiguration as Sentry.Unity.Editor.ScriptableOptionsConfiguration;
-                setupScript?.Configure(options, cliOptions);
+                var setupScript = scriptableOptions.BuildTimeOptionsConfiguration;
+                if (setupScript != null)
+                {
+                    setupScript.Configure(options, cliOptions);
+                }
             }
 
             return (options, cliOptions);

@@ -1,20 +1,23 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Debug = UnityEngine.Debug;
 using Sentry.Extensibility;
+using Sentry.Unity.Tests.SharedClasses;
+using UnityEditor.PackageManager;
 
 namespace Sentry.Unity.Tests
 {
-    public class SentryUnitySelfInitializationTests : DisabledSelfInitializationTests
+    public class SentryUnitySelfInitializationTests
     {
         [TearDown]
         public void TearDown()
         {
             if (SentrySdk.IsEnabled)
             {
-                SentrySdk.Close();
+                SentryUnity.Close();
             }
         }
 
@@ -65,7 +68,7 @@ namespace Sentry.Unity.Tests
         {
             var options = new SentryUnityOptions
             {
-                Dsn = "https://94677106febe46b88b9b9ae5efd18a00@o447951.ingest.sentry.io/5439417"
+                Dsn = "https://e9ee299dbf554dfd930bc5f3c90d5d4b@o447951.ingest.sentry.io/4504604988538880"
             };
 
             SentryUnity.Init(options);
@@ -82,6 +85,25 @@ namespace Sentry.Unity.Tests
             SentryUnity.Init(options);
 
             Assert.IsFalse(SentrySdk.IsEnabled);
+        }
+
+        [Test]
+        public void Init_MultipleTimes_LogsWarning()
+        {
+            var testLogger = new TestLogger();
+            var options = new SentryUnityOptions
+            {
+                Debug = true,
+                Dsn = "https://e9ee299dbf554dfd930bc5f3c90d5d4b@o447951.ingest.sentry.io/4504604988538880",
+                DiagnosticLogger = testLogger,
+            };
+
+            SentryUnity.Init(options);
+            SentryUnity.Init(options);
+
+            Assert.IsTrue(testLogger.Logs.Any(log =>
+                log.logLevel == SentryLevel.Warning &&
+                log.message.Contains("The SDK has already been initialized.")));
         }
     }
 }

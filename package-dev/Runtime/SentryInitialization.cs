@@ -92,7 +92,7 @@ namespace Sentry.Unity
                 }
 
 #if !SENTRY_WEBGL
-                if (options.TracesSampleRate > 0.0f)
+                if (options.TracesSampleRate > 0.0f && options.AutoStartupTraces)
                 {
                     options.DiagnosticLogger?.LogInfo("Creating '{0}' transaction for runtime initialization.",
                         StartupTransactionOperation);
@@ -130,21 +130,6 @@ namespace Sentry.Unity
 #else
                false;
 #endif
-        }
-
-        public string Platform
-        {
-            get =>
-#if UNITY_IOS || UNITY_STANDALONE_OSX
-                "macho"
-#elif UNITY_ANDROID || UNITY_STANDALONE_LINUX
-                "elf"
-#elif UNITY_STANDALONE_WIN
-                "pe"
-#else
-                "unknown"
-#endif
-            ;
         }
 
         public Il2CppMethods Il2CppMethods => _il2CppMethods;
@@ -218,22 +203,25 @@ namespace Sentry.Unity
         private static void Il2CppNativeStackTraceShim(IntPtr exc, out IntPtr addresses, out int numFrames, out string? imageUUID, out string? imageName)
         {
             var uuidBuffer = IntPtr.Zero;
-            il2cpp_native_stack_trace(exc, out addresses, out numFrames, out uuidBuffer, out imageName);
+            var imageNameBuffer = IntPtr.Zero;
+            il2cpp_native_stack_trace(exc, out addresses, out numFrames, out uuidBuffer, out imageNameBuffer);
 
             try
             {
                 imageUUID = SanitizeDebugId(uuidBuffer);
+                imageName = (imageNameBuffer == IntPtr.Zero) ? null : Marshal.PtrToStringAnsi(imageNameBuffer);
             }
             finally
             {
                 il2cpp_free(uuidBuffer);
+                il2cpp_free(imageNameBuffer);
             }
         }
 
         // Definition from Unity `2021.3` (and later):
         // void il2cpp_native_stack_trace(const Il2CppException * ex, uintptr_t** addresses, int* numFrames, char** imageUUID, char** imageName)
         [DllImport("__Internal")]
-        private static extern void il2cpp_native_stack_trace(IntPtr exc, out IntPtr addresses, out int numFrames, out IntPtr imageUUID, out string? imageName);
+        private static extern void il2cpp_native_stack_trace(IntPtr exc, out IntPtr addresses, out int numFrames, out IntPtr imageUUID, out IntPtr imageName);
 #else
         private static void Il2CppNativeStackTraceShim(IntPtr exc, out IntPtr addresses, out int numFrames, out string? imageUUID, out string? imageName)
         {

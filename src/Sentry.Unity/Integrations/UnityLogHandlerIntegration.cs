@@ -29,6 +29,18 @@ namespace Sentry.Unity.Integrations
         {
             _hub = hub;
             _sentryOptions = sentryOptions as SentryUnityOptions;
+            if (_sentryOptions is null)
+            {
+                return;
+            }
+
+            // If called twice (i.e. init with the same options object) the integration will reference itself as the
+            // original handler loghandler and endlessly forward to itself
+            if (Debug.unityLogger.logHandler == this)
+            {
+                _sentryOptions.DiagnosticLogger?.LogWarning("UnityLogHandlerIntegration has already been registered.");
+                return;
+            }
 
             if (_sentryOptions != null)
             {
@@ -87,27 +99,27 @@ namespace Sentry.Unity.Integrations
                 return;
             }
 
-            // TODO: Is format '{0}' and args.length == 1 guaranteed?
-            if (args.Length == 0 || !format.Contains("{0}"))
+            // The SDK sets "Sentry" as tag when logging and we're not capturing SDK internal logs. Expected format: "{0}: {1}"
+            if (args.Length > 1 && args[0].Equals("Sentry"))
             {
                 return;
             }
 
-            if (args[0] is not string logMessage)
-            {
-                return;
-            }
+            // if (args[0] is not string logMessage)
+            // {
+                // return;
+            // }
 
-            if (logType == LogType.Exception && args.Length < 2)
-            {
-                return;
-            }
-            // We're not capturing SDK internal logs
-            if (logMessage.StartsWith(UnityLogger.LogPrefix, StringComparison.Ordinal))
-            {
-                // TODO: Maybe color Sentry internal logs (highlight 'Sentry'?)
-                return;
-            }
+            // if (logType == LogType.Exception && args.Length < 2)
+            // {
+                // return;
+            // }
+            // // We're not capturing SDK internal logs
+            // if (logMessage.StartsWith(UnityLogger.LogPrefix, StringComparison.Ordinal))
+            // {
+                // // TODO: Maybe color Sentry internal logs (highlight 'Sentry'?)
+                // return;
+            // }
 
             void Capture(string logMessage, LogType logType, bool OnlyBreadcrumbs = false)
             {
@@ -130,6 +142,7 @@ namespace Sentry.Unity.Integrations
 
                 if (logType is LogType.Error or LogType.Assert && !OnlyBreadcrumbs)
                 {
+                    // TODO: Capture the context (i.e. grab the name if != null and set it as context)
                     _hub.CaptureMessage(logMessage, ToEventTagType(logType));
                 }
 
@@ -139,6 +152,8 @@ namespace Sentry.Unity.Integrations
                     _hub.AddBreadcrumb(message: logMessage, category: "unity.logger", level: ToBreadcrumbLevel(logType));
                 }
             }
+
+            var logMessage = args.Length == 0 ? format : string.Format(format, args);
 
             if (_sentryOptions?.EnableLogDebouncing is true && _sentryOptions?.Debouncer != null)
             {

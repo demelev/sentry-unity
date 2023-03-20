@@ -2,6 +2,7 @@ using System;
 using Sentry.Extensibility;
 using Sentry.Unity.Integrations;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Sentry.Unity
 {
@@ -31,8 +32,9 @@ namespace Sentry.Unity
         [field: SerializeField] public bool TreatExceptionsAsHandled { get; set; } = false;
 
         [field: SerializeField] public double TracesSampleRate { get; set; } = 0;
-
-        [field: SerializeField] public bool PerformanceAutoInstrumentationEnabled { get; set; } = false;
+        [field: SerializeField] public bool AutoStartupTraces { get; set; } = true;
+        [field: SerializeField] public bool AutoSceneLoadTraces { get; set; } = true;
+        [field: SerializeField] public bool AutoAwakeTraces { get; set; } = false;
 
         [field: SerializeField] public bool AutoSessionTracking { get; set; } = true;
 
@@ -47,6 +49,11 @@ namespace Sentry.Unity
         [field: SerializeField] public bool AttachScreenshot { get; set; }
         [field: SerializeField] public ScreenshotQuality ScreenshotQuality { get; set; } = ScreenshotQuality.High;
         [field: SerializeField] public int ScreenshotCompression { get; set; } = 75;
+
+        [field: SerializeField] public bool AttachViewHierarchy { get; set; } = false;
+        [field: SerializeField] public int MaxViewHierarchyRootObjects { get; set; } = 100;
+        [field: SerializeField] public int MaxViewHierarchyObjectChildCount { get; set; } = 20;
+        [field: SerializeField] public int MaxViewHierarchyDepth { get; set; } = 10;
 
         [field: SerializeField] public bool BreadcrumbsForLogs { get; set; } = true;
         [field: SerializeField] public bool BreadcrumbsForWarnings { get; set; } = true;
@@ -70,17 +77,20 @@ namespace Sentry.Unity
         [field: SerializeField] public float SampleRate { get; set; } = 1.0f;
         [field: SerializeField] public int ShutdownTimeout { get; set; } = 2000;
         [field: SerializeField] public int MaxQueueItems { get; set; } = 30;
+
+        [field: SerializeField] public bool AnrDetectionEnabled { get; set; } = true;
+        [field: SerializeField] public int AnrTimeout { get; set; } = (int)TimeSpan.FromSeconds(5).TotalMilliseconds;
+
         [field: SerializeField] public bool IosNativeSupportEnabled { get; set; } = true;
         [field: SerializeField] public bool AndroidNativeSupportEnabled { get; set; } = true;
         [field: SerializeField] public bool WindowsNativeSupportEnabled { get; set; } = true;
         [field: SerializeField] public bool MacosNativeSupportEnabled { get; set; } = true;
         [field: SerializeField] public bool LinuxNativeSupportEnabled { get; set; } = true;
+
         [field: SerializeField] public bool Il2CppLineNumberSupportEnabled { get; set; } = true;
 
-        [field: SerializeField] public Sentry.Unity.ScriptableOptionsConfiguration? OptionsConfiguration { get; set; }
-
-        // Actual type is `Sentry.Unity.Editor.ScriptableOptionsConfiguration` but we can't reference it here because we don't depend on the editor Assembly.
-        [field: SerializeField] public ScriptableObject? BuildtimeOptionsConfiguration { get; set; }
+        [field: SerializeField] public SentryRuntimeOptionsConfiguration? RuntimeOptionsConfiguration { get; set; }
+        [field: SerializeField] public SentryBuildTimeOptionsConfiguration? BuildTimeOptionsConfiguration { get; set; }
 
         [field: SerializeField] public bool Debug { get; set; } = true;
         [field: SerializeField] public bool DebugOnlyInEditor { get; set; } = true;
@@ -116,12 +126,18 @@ namespace Sentry.Unity
                 EnableLogDebouncing = EnableLogDebouncing,
                 TreatExceptionsAsHandled = TreatExceptionsAsHandled,
                 TracesSampleRate = TracesSampleRate,
+                AutoStartupTraces = AutoStartupTraces,
+                AutoSceneLoadTraces = AutoSceneLoadTraces,
                 AutoSessionTracking = AutoSessionTracking,
                 AutoSessionTrackingInterval = TimeSpan.FromMilliseconds(AutoSessionTrackingInterval),
                 AttachStacktrace = AttachStacktrace,
                 AttachScreenshot = AttachScreenshot,
                 ScreenshotQuality = ScreenshotQuality,
                 ScreenshotCompression = ScreenshotCompression,
+                AttachViewHierarchy = AttachViewHierarchy,
+                MaxViewHierarchyRootObjects = MaxViewHierarchyRootObjects,
+                MaxViewHierarchyObjectChildCount = MaxViewHierarchyObjectChildCount,
+                MaxViewHierarchyDepth = MaxViewHierarchyDepth,
                 MaxBreadcrumbs = MaxBreadcrumbs,
                 ReportAssembliesMode = ReportAssembliesMode,
                 SendDefaultPii = SendDefaultPii,
@@ -135,13 +151,14 @@ namespace Sentry.Unity
                 // need to set it here directly.
                 Debug = ShouldDebug(application.IsEditor && !isBuilding),
                 DiagnosticLevel = DiagnosticLevel,
+                AnrTimeout = TimeSpan.FromMilliseconds(AnrTimeout),
                 IosNativeSupportEnabled = IosNativeSupportEnabled,
                 AndroidNativeSupportEnabled = AndroidNativeSupportEnabled,
                 WindowsNativeSupportEnabled = WindowsNativeSupportEnabled,
                 MacosNativeSupportEnabled = MacosNativeSupportEnabled,
                 LinuxNativeSupportEnabled = LinuxNativeSupportEnabled,
                 Il2CppLineNumberSupportEnabled = Il2CppLineNumberSupportEnabled,
-                PerformanceAutoInstrumentationEnabled = PerformanceAutoInstrumentationEnabled,
+                PerformanceAutoInstrumentationEnabled = AutoAwakeTraces,
             };
 
             if (!string.IsNullOrWhiteSpace(ReleaseOverride))
@@ -191,12 +208,20 @@ namespace Sentry.Unity
 
             if (!isBuilding)
             {
-                OptionsConfiguration?.Configure(options);
+                if (RuntimeOptionsConfiguration != null)
+                {
+                    RuntimeOptionsConfiguration.Configure(options);
+                }
 
                 // Doing this after the configure callback to allow users to programmatically opt out
-                if (options.Il2CppLineNumberSupportEnabled && unityInfo is not null)
+                if (!application.IsEditor && options.Il2CppLineNumberSupportEnabled && unityInfo is not null)
                 {
                     options.AddIl2CppExceptionProcessor(unityInfo);
+                }
+
+                if (!AnrDetectionEnabled)
+                {
+                    options.DisableAnrIntegration();
                 }
             }
 

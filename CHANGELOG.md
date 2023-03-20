@@ -2,18 +2,128 @@
 
 ## Unreleased
 
+### Dependencies
+
+- Bump CLI from v2.14.4 to v2.15.1 ([#1231](https://github.com/getsentry/sentry-unity/pull/1231))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2151)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.14.4...2.15.1)
+
+## 1.1.0
+
+### Fixes
+
+- Fixed missing debug file upload for assembly definitions for Mono builds ([#1226](https://github.com/getsentry/sentry-unity/pull/1226))
+- The ANR detection is now unaffected by changes to `Time.timescale` ([#1225](https://github.com/getsentry/sentry-unity/pull/1225))
+
+### Features
+
+- Added `View Hierarchy` as an opt-in attachment. This will capture the scene hierarchy at the moment an event occurs and send it to Sentry ([#1169](https://github.com/getsentry/sentry-unity/pull/1169))
+
+### Dependencies
+
+- Bump CLI from v2.13.0 to v2.14.4 ([#1213](https://github.com/getsentry/sentry-unity/pull/1213), [#1217](https://github.com/getsentry/sentry-unity/pull/1217))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2144)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.13.0...2.14.4)
+- Bump .NET SDK from v3.28.1 to v3.29.1 ([#1218](https://github.com/getsentry/sentry-unity/pull/1218), [#1223](https://github.com/getsentry/sentry-unity/pull/1223))
+  - [changelog](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md#3291)
+  - [diff](https://github.com/getsentry/sentry-dotnet/compare/3.28.1...3.29.1)
+- Bump Cocoa SDK from v8.2.0 to v8.3.1 ([#1219](https://github.com/getsentry/sentry-unity/pull/1219), [#1228](https://github.com/getsentry/sentry-unity/pull/1228))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#831)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.2.0...8.3.1)
+
+## 1.0.0
+
+### Breaking Changes
+
+- Renamed `OptionsConfiguration` to `RuntimeOptionsConfiguration` on the ScriptableSentryOptions ([#1196](https://github.com/getsentry/sentry-unity/pull/1196))\
+    If you make use of programmatic runtime options configuration, you will need to reassign the scriptable object in the configuration tab
+- Renamed `SentryBuildtimeOptionsConfiguration` to `SentryBuildTimeOptionsConfiguration` ([#1187](https://github.com/getsentry/sentry-unity/pull/1187))\
+    If you make use of the programmatic build time configuration, you will need to update your implementation with the base class
+- Removed `Override Sentry URL` from editor window ([#1188](https://github.com/getsentry/sentry-unity/pull/1188))\
+    The option is still available from within the `SentryBuildTimeOptionsConfiguration`
+
+### Fixes
+
+- The SDK no longer logs a warning due to a missing log file on non-windows player platforms ([#1195](https://github.com/getsentry/sentry-unity/pull/1195))
+- Preventing `LoggingIntegration` from registering multiple times ([#1178](https://github.com/getsentry/sentry-unity/pull/1178))
+- Fixed the logging integration only capturing tags and missing the message ([#1150](https://github.com/getsentry/sentry-unity/pull/1150))
+
+### Features
+
+- Added Performance Integration options to editor window ([#1198](https://github.com/getsentry/sentry-unity/pull/1198))
+- Much improved line numbers for IL2CPP builds by setting the `instruction_addr_adjustment` appropriately ([#1165](https://github.com/getsentry/sentry-unity/pull/1165))
+- Added ANR options to the editor window and made ANR timeout accessible on the options object ([#1181](https://github.com/getsentry/sentry-unity/pull/1181))
+
+### Dependencies
+
+- Bump Java SDK from v6.12.1 to v6.14.0 ([#1156](https://github.com/getsentry/sentry-unity/pull/1156), [#1171](https://github.com/getsentry/sentry-unity/pull/1171), [#1184](https://github.com/getsentry/sentry-unity/pull/1184))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6140)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.12.1...6.14.0)
+- Bump Native SDK from v0.5.3 to v0.6.0 ([#1157](https://github.com/getsentry/sentry-unity/pull/1157), [#1182](https://github.com/getsentry/sentry-unity/pull/1182))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#060)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.5.3...0.6.0)
+- Bump CLI from v2.11.0 to v2.13.0 ([#1163](https://github.com/getsentry/sentry-unity/pull/1163), [#1186](https://github.com/getsentry/sentry-unity/pull/1186))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2130)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.11.0...2.13.0)
+- Bump .NET SDK from v3.26.2 to v3.28.1 ([#1164](https://github.com/getsentry/sentry-unity/pull/1164), [#1170](https://github.com/getsentry/sentry-unity/pull/1170), [#1172](https://github.com/getsentry/sentry-unity/pull/1172), [#1175](https://github.com/getsentry/sentry-unity/pull/1175))
+  - [changelog](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md#3281)
+  - [diff](https://github.com/getsentry/sentry-dotnet/compare/3.26.2...3.28.1)
+- Bump Cocoa SDK from v7.31.5 to v8.2.0 ([#1162](https://github.com/getsentry/sentry-unity/pull/1162), [#1199](https://github.com/getsentry/sentry-unity/pull/1199))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#820)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/7.31.5...8.2.0)
+
+## 0.28.1
+
+### Fixes
+
+- Fixed conflicting default name for scriptable options configuration scripts ([#1146](https://github.com/getsentry/sentry-unity/pull/1146))
+- Made inlined helpers on the macOS bridge static ([#1148](https://github.com/getsentry/sentry-unity/pull/1148))
+
+### Dependencies
+
+- Bump Java SDK from v6.11.0 to v6.12.1 ([#1143](https://github.com/getsentry/sentry-unity/pull/1143))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6121)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.11.0...6.12.1)
+- Bump .NET SDK from v3.26.0 to v3.26.2 ([#1142](https://github.com/getsentry/sentry-unity/pull/1142), [#1152](https://github.com/getsentry/sentry-unity/pull/1152))
+  - [changelog](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md#3262)
+  - [diff](https://github.com/getsentry/sentry-dotnet/compare/3.26.0...3.26.2)
+
+## 0.28.0
+
+### Breaking Changes
+
+- Fixed the SDK creating warnings before initializing when loading the options.
+  - `Sentry.Unity.ScriptableOptionsConfiguration` changed to `SentryRuntimeOptionsConfiguration`
+  - and `Sentry.Unity.Editor.ScriptableOptionsConfiguration` changed to `SentryBuildtimeOptionsConfiguration`
+If you make use of the programmatic configuration, you will need to update your implementation with those base classes ([#1128](https://github.com/getsentry/sentry-unity/pull/1128))
+
+### Fixes
+
+- Removed build GUID from automated release creation to keep events from different layers in the same release ([#1127](https://github.com/getsentry/sentry-unity/pull/1127))
+- Fixed an issue related to the IL2CPP line number feature where a C# exception could lead to a crash ([#1126](https://github.com/getsentry/sentry-unity/pull/1126))
+- No longer log warnings about missing IL2CPP methods when running in the Editor ([#1132](https://github.com/getsentry/sentry-unity/pull/1132))
+
 ### Features
 
 - Mono PDB files upload during build ([#1106](https://github.com/getsentry/sentry-unity/pull/1106))
 
 ### Dependencies
 
-- Bump Java SDK from v6.9.1 to v6.9.2 ([#1107](https://github.com/getsentry/sentry-unity/pull/1107))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#692)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.9.1...6.9.2)
+- Bump Java SDK from v6.9.1 to v6.11.0 ([#1107](https://github.com/getsentry/sentry-unity/pull/1107), [#1122](https://github.com/getsentry/sentry-unity/pull/1122), [#1133](https://github.com/getsentry/sentry-unity/pull/1133))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#6110)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.9.1...6.11.0)
 - Bump Native SDK from v0.5.2 to v0.5.3 ([#1109](https://github.com/getsentry/sentry-unity/pull/1109))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#053)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.5.2...0.5.3)
+- Bump Cocoa SDK from v7.31.3 to v7.31.5 ([#1115](https://github.com/getsentry/sentry-unity/pull/1115), [#1129](https://github.com/getsentry/sentry-unity/pull/1129))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/8.0.0/CHANGELOG.md#7315)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/7.31.3...7.31.5)
+- Bump .NET SDK from v3.24.0 to v3.26.0 ([#1121](https://github.com/getsentry/sentry-unity/pull/1121), [#1137](https://github.com/getsentry/sentry-unity/pull/1137))
+  - [changelog](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md#3260)
+  - [diff](https://github.com/getsentry/sentry-dotnet/compare/3.24.0...3.26.0)
+- Bump CLI from v2.10.0 to v2.11.0 ([#1124](https://github.com/getsentry/sentry-unity/pull/1124))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2110)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.10.0...2.11.0)
 
 ## 0.27.0
 

@@ -34,6 +34,16 @@ namespace Sentry.Unity
         public bool Enabled { get; set; } = true;
 
         /// <summary>
+        /// "Whether the SDK should automatically create traces during startup."
+        /// </summary>
+        public bool AutoStartupTraces { get; set; } = true;
+
+        /// <summary>
+        /// "Whether the SDK should automatically create traces when loading scenes."
+        /// </summary>
+        public bool AutoSceneLoadTraces { get; set; } = true;
+
+        /// <summary>
         /// Whether Sentry events should be captured while in the Unity Editor.
         /// </summary>
         // Lower entry barrier, likely set to false after initial setup.
@@ -99,6 +109,26 @@ namespace Sentry.Unity
         public bool AttachScreenshot { get; set; } = false;
 
         /// <summary>
+        /// Try to attach the current scene's hierarchy.
+        /// </summary>
+        public bool AttachViewHierarchy { get; set; } = false;
+
+        /// <summary>
+        /// Maximum number of captured GameObjects in a scene root.
+        /// </summary>
+        public int MaxViewHierarchyRootObjects { get; set; } = 100;
+
+        /// <summary>
+        /// Maximum number of child objects captured for each GameObject.
+        /// </summary>
+        public int MaxViewHierarchyObjectChildCount { get; set; } = 20;
+
+        /// <summary>
+        /// Maximum depth of the hierarchy to capture. For example, setting 1 will only capture root GameObjects.
+        /// </summary>
+        public int MaxViewHierarchyDepth { get; set; } = 10;
+
+        /// <summary>
         /// The quality of the attached screenshot
         /// </summary>
         public ScreenshotQuality ScreenshotQuality { get; set; } = ScreenshotQuality.High;
@@ -112,6 +142,11 @@ namespace Sentry.Unity
         /// Whether the SDK should automatically add breadcrumbs per LogType
         /// </summary>
         public Dictionary<LogType, bool> AddBreadcrumbsForLogType { get; set; }
+
+        /// <summary>
+        /// The duration in [ms] for how long the game has to be unresponsive before an ANR event is reported.
+        /// </summary>
+        public TimeSpan AnrTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
         /// <summary>
         /// Whether the SDK should add native support for iOS
@@ -235,10 +270,6 @@ namespace Sentry.Unity
             else
             {
                 Release = application.Version;
-            }
-            if (!string.IsNullOrWhiteSpace(application.BuildGUID))
-            {
-                Release += $"+{application.BuildGUID}";
             }
 
             Environment = application.IsEditor && !isBuilding
