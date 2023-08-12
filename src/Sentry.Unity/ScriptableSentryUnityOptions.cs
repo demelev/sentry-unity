@@ -28,6 +28,7 @@ namespace Sentry.Unity
         [field: SerializeField] public string? Dsn { get; set; }
         [field: SerializeField] public bool CaptureInEditor { get; set; } = true;
         [field: SerializeField] public bool TreatExceptionsAsHandled { get; set; } = false;
+        [field: SerializeField] public bool UseExperimentalDebouncer { get; set; } = false;
         [field: SerializeField] public bool EnableLogDebouncing { get; set; } = false;
         [field: SerializeField] public int DebounceTimeLog { get; set; } = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
         [field: SerializeField] public int DebounceTimeWarning { get; set; } = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
@@ -133,6 +134,7 @@ namespace Sentry.Unity
                 DebounceTimeLog = TimeSpan.FromMilliseconds(DebounceTimeLog),
                 DebounceTimeWarning = TimeSpan.FromMilliseconds(DebounceTimeWarning),
                 DebounceTimeError = TimeSpan.FromMilliseconds(DebounceTimeError),
+                UseExperimentalDebouncer = UseExperimentalDebouncer,
                 TreatExceptionsAsHandled = TreatExceptionsAsHandled,
                 TracesSampleRate = TracesSampleRate,
                 AutoStartupTraces = AutoStartupTraces,

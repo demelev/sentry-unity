@@ -109,21 +109,21 @@ namespace Sentry.Unity.Integrations
                 return;
             }
 
-            if (args[0] is not string logMessage)
-            {
-                return;
-            }
+            // if (args[0] is not string logMessage)
+            // {
+            //     return;
+            // }
 
-            if (logType == LogType.Exception && args.Length < 2)
-            {
-                return;
-            }
-            // We're not capturing SDK internal logs
-            if (logMessage.StartsWith(UnityLogger.LogPrefix, StringComparison.Ordinal))
-            {
-                // TODO: Maybe color Sentry internal logs (highlight 'Sentry'?)
-                return;
-            }
+            // if (logType == LogType.Exception && args.Length < 2)
+            // {
+            //     return;
+            // }
+            // // We're not capturing SDK internal logs
+            // if (logMessage.StartsWith(UnityLogger.LogTag, StringComparison.Ordinal))
+            // {
+            //     // TODO: Maybe color Sentry internal logs (highlight 'Sentry'?)
+            //     return;
+            // }
 
             void Capture(string logMessage, LogType logType, bool OnlyBreadcrumbs = false)
             {
