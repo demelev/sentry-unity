@@ -18,8 +18,9 @@ namespace Sentry.Unity.Editor.Android
         public int callbackOrder { get; } = 1;
         public void OnPostGenerateGradleAndroidProject(string basePath)
         {
+            var (options, cliOptions) = SentryScriptableObject.ConfiguredBuildTimeOptions();
             var androidManifestConfiguration = new AndroidManifestConfiguration();
-            androidManifestConfiguration.OnPostGenerateGradleAndroidProject(basePath);
+            androidManifestConfiguration.OnPostGenerateGradleAndroidProject(basePath, cliOptions);
         }
     }
 
@@ -57,8 +58,18 @@ namespace Sentry.Unity.Editor.Android
             _scriptingImplementation = scriptingImplementation;
         }
 
-        public void OnPostGenerateGradleAndroidProject(string basePath)
+        public void OnPostGenerateGradleAndroidProject(string basePath, SentryCliOptions? cliOptions)
         {
+
+            var unityProjectPath = Directory.GetParent(Application.dataPath).FullName;
+            var gradleProjectPath = Directory.GetParent(basePath).FullName;
+
+            if (cliOptions?.UploadSymbols is true)
+            {
+                _logger.LogWarning("Uploading android symbols!");
+                SetupSymbolsUpload(unityProjectPath, gradleProjectPath);
+            }
+
             if (_scriptingImplementation != ScriptingImplementation.IL2CPP)
             {
                 if (_options is { AndroidNativeSupportEnabled: true })
@@ -70,9 +81,6 @@ namespace Sentry.Unity.Editor.Android
             }
 
             ModifyManifest(basePath);
-
-            var unityProjectPath = Directory.GetParent(Application.dataPath).FullName;
-            var gradleProjectPath = Directory.GetParent(basePath).FullName;
 
             CopyAndroidSdkToGradleProject(unityProjectPath, gradleProjectPath);
             AddAndroidSdkDependencies(gradleProjectPath);
