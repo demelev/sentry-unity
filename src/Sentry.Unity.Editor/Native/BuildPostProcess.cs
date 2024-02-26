@@ -27,6 +27,9 @@ namespace Sentry.Unity.Editor.Native
             var logger = options?.DiagnosticLogger ?? new UnityLogger(options ?? new SentryUnityOptions());
             var isMono = PlayerSettings.GetScriptingBackend(targetGroup) == ScriptingImplementation.Mono2x;
 
+            var buildOutputDir = Path.GetDirectoryName(executablePath);
+            var executableName = Path.GetFileName(executablePath);
+
             try
             {
                 if (options is null)
@@ -38,8 +41,13 @@ namespace Sentry.Unity.Editor.Native
 
                 if (!options.IsValid())
                 {
-                    logger.LogDebug("Native support disabled.");
+                    logger.LogDebug("Sentry is disabled, no need in native support.");
                     return;
+                }
+
+                if (cliOptions?.UploadSymbols is true)
+                {
+                    UploadDebugSymbols(logger, target, buildOutputDir, executableName, options, cliOptions, isMono);
                 }
 
                 if (!IsEnabledForPlatform(target, options))
@@ -49,11 +57,7 @@ namespace Sentry.Unity.Editor.Native
                 }
 
                 logger.LogDebug("Adding native support.");
-
-                var buildOutputDir = Path.GetDirectoryName(executablePath);
-                var executableName = Path.GetFileName(executablePath);
                 AddCrashHandler(logger, target, buildOutputDir, executableName);
-                UploadDebugSymbols(logger, target, buildOutputDir, executableName, options, cliOptions, isMono);
             }
             catch (Exception e)
             {
