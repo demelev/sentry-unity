@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump .NET SDK from v3.35.0 to v4.2.1 ([#108](https://github.com/demelev/sentry-unity/pull/108))
+  - [changelog](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md#421)
+  - [diff](https://github.com/getsentry/sentry-dotnet/compare/3.35.0...4.2.1)
+
 ## 1.5.1
 
 ### Fixes
