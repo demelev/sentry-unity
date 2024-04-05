@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Java SDK from v7.6.0-10-gab55b2cb to v7.6.0 ([#105](https://github.com/demelev/sentry-unity/pull/105))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#760)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.6.0-10-gab55b2cb...7.6.0)
+
 ## 1.5.1
 
 ### Fixes
