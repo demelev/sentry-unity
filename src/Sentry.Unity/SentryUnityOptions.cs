@@ -9,6 +9,9 @@ using CompressionLevel = System.IO.Compression.CompressionLevel;
 
 namespace Sentry.Unity;
 
+public delegate void DebouncerCaptureCallback(string logMessage, LogType logType, bool AsBreadcrumbsOnly);
+public delegate void DebouncerFunction(string logMessage, LogType logType, DebouncerCaptureCallback capture);
+
 /// <summary>
 /// Sentry Unity Options.
 /// </summary>
@@ -17,9 +20,6 @@ namespace Sentry.Unity;
 /// </remarks>
 public sealed class SentryUnityOptions : SentryOptions
 {
-    public delegate void DebouncerCaptureCallback(string logMessage, LogType logType, bool AsBreadcrumbsOnly);
-    public delegate void DebouncerFunction(string logMessage, LogType logType, DebouncerCaptureCallback capture);
-
     /// <summary>
     /// UPM name of Sentry Unity SDK (package.json)
     /// </summary>
