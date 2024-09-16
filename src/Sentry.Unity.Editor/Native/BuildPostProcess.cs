@@ -124,13 +124,13 @@ public static class BuildPostProcess
             var fullPath = Path.Combine(buildOutputDir, name);
             if (fullPath.Contains("*") || Directory.Exists(fullPath) || File.Exists(fullPath))
             {
-                paths += $" \"{name}\"";
-                logger.LogDebug($"Adding '{name}' to the debug-info upload");
+                paths += $" \"{fullPath}\"";
+                logger.LogDebug($"Adding '{fullPath}' to the debug-info upload");
                 return true;
             }
             else
             {
-                logger.LogWarning($"Couldn't find '{name}' - debug symbol upload will be incomplete");
+                logger.LogWarning($"Couldn't find '{fullPath}' - debug symbol upload will be incomplete");
                 return false;
             }
         };
@@ -226,7 +226,6 @@ public static class BuildPostProcess
             StartInfo = new ProcessStartInfo
             {
                 FileName = SentryCli.SetupSentryCli(),
-                WorkingDirectory = buildOutputDir,
                 Arguments = cliArgs,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
