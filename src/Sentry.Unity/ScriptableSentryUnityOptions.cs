@@ -28,7 +28,9 @@ public class ScriptableSentryUnityOptions : ScriptableObject
 
     [field: SerializeField] public string? Dsn { get; set; }
     [field: SerializeField] public bool CaptureInEditor { get; set; } = true;
+    [field: SerializeField] public bool UseExperimentalDebouncer { get; set; } = false;
 
+    [field: SerializeField] public bool TreatExceptionsAsHandled { get; set; } = false;
     [field: SerializeField] public bool EnableLogDebouncing { get; set; } = false;
     [field: SerializeField] public int DebounceTimeLog { get; set; } = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
     [field: SerializeField] public int DebounceTimeWarning { get; set; } = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
@@ -142,6 +144,8 @@ public class ScriptableSentryUnityOptions : ScriptableObject
             DebounceTimeLog = TimeSpan.FromMilliseconds(DebounceTimeLog),
             DebounceTimeWarning = TimeSpan.FromMilliseconds(DebounceTimeWarning),
             DebounceTimeError = TimeSpan.FromMilliseconds(DebounceTimeError),
+            TreatExceptionsAsHandled = TreatExceptionsAsHandled,
+            UseExperimentalDebouncer = UseExperimentalDebouncer,
             TracesSampleRate = TracesSampleRate,
             AutoStartupTraces = AutoStartupTraces,
             AutoSceneLoadTraces = AutoSceneLoadTraces,
@@ -197,7 +201,6 @@ public class ScriptableSentryUnityOptions : ScriptableObject
         options.AddBreadcrumbsForLogType[LogType.Assert] = BreadcrumbsForAsserts;
         options.AddBreadcrumbsForLogType[LogType.Error] = BreadcrumbsForErrors;
         options.AddBreadcrumbsForLogType[LogType.Exception] = BreadcrumbsForExceptions;
-
         options.FailedRequestStatusCodes = new List<HttpStatusCodeRange>();
         for (var i = 0; i < FailedRequestStatusCodes.Count; i += 2)
         {
