@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Java SDK from v8.8.0-6-gcdfac96e to v8.8.0 ([#284](https://github.com/demelev/sentry-unity/pull/284))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#880)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.8.0-6-gcdfac96e...8.8.0)
+
 ## 1.5.1
 
 ### Fixes
