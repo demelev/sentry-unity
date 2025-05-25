@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Java SDK from v8.12.0-22-g8295b2f1 to v8.12.0 ([#299](https://github.com/demelev/sentry-unity/pull/299))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8120)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.12.0-22-g8295b2f1...8.12.0)
+
 ## 1.5.1
 
 ### Fixes
