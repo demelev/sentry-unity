@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Java SDK from v8.13.3-3-ge56c1d15 to v8.13.3 ([#314](https://github.com/demelev/sentry-unity/pull/314))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8133)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.13.3-3-ge56c1d15...8.13.3)
+
 ## 1.5.1
 
 ### Fixes
