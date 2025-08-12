@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Native SDK from v0.6.5 to v0.10.0 ([#336](https://github.com/demelev/sentry-unity/pull/336))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0100)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.6.5...0.10.0)
+
 ## 1.5.1
 
 ### Fixes
