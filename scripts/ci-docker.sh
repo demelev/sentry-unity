@@ -56,7 +56,7 @@ $suexec $container ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 $suexec $container ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 
 $suexec $container mkdir -p /usr/share/unity3d/config/
-echo $licenseConfig | $suexec -i $container sh -c "cat > /usr/share/unity3d/config/services-config.json"
+<<<$licenseConfig $suexec -i $container sh -c "cat > /usr/share/unity3d/config/services-config.json"
 $suexec $container chown -R $uid /usr/share/unity3d/config/
 
 # Unity 2021+ tries to write to this directory during asset import...
