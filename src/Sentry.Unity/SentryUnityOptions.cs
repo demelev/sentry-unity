@@ -187,6 +187,16 @@ public sealed class SentryUnityOptions : SentryOptions
     public bool FilterBadGatewayExceptions { get; set; } = true;
 
     /// <summary>
+    /// Whether Sentry should mark all exceptions as handled.
+    /// </summary>
+    public bool TreatExceptionsAsHandled { get; set; } = false;
+
+    /// <summary>
+    /// Custom function determines whether an exception should be makerd as handled.
+    /// </summary>
+    public Func<Exception, bool>? IsExceptionHandledCheck { get; set; }
+
+    /// <summary>
     /// Whether the SDK should add native support for iOS
     /// </summary>
     public bool IosNativeSupportEnabled { get; set; } = true;
@@ -512,7 +522,7 @@ public sealed class SentryUnityOptions : SentryOptions
         };
 
         // Only assign the cache directory path if we're on a "known" platform.
-        // Special casing Switch here: Accessing `Application.persistentDataPath` implicitly creates a directory 
+        // Special casing Switch here: Accessing `Application.persistentDataPath` implicitly creates a directory
         // and leads to a crash.
         if (IsKnownPlatform(application.Platform) && application.Platform is not RuntimePlatform.Switch)
         {

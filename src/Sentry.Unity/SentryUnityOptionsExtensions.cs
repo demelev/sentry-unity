@@ -81,6 +81,8 @@ public static class SentryUnityOptionsExtensions
         }
     }
 
+    public static bool IsExceptionHandled(this SentryUnityOptions options, System.Exception ex) => options.IsExceptionHandledCheck?.Invoke(ex) ?? options.TreatExceptionsAsHandled;
+
     /// <summary>
     /// Disables the capture of logs, warnings, errors, breadcrumbs, and structured logs through
     /// <see cref="UnityApplicationLoggingIntegration"/>.

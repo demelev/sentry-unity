@@ -80,7 +80,7 @@ internal sealed class UnityLogHandlerIntegration : ISdkIntegration, ILogHandler
         // NOTE: This might not be entirely true, as a user could as well call `Debug.LogException`
         // and expect a handled exception but it is not possible for us to differentiate
         // https://docs.sentry.io/platforms/unity/troubleshooting/#unhandled-exceptions---debuglogexception
-        exception.SetSentryMechanism("Unity.LogException", handled: false, terminal: false);
+        exception.SetSentryMechanism("Unity.LogException", handled: _options.IsExceptionHandled(exception), terminal: false);
         _ = _hub.CaptureException(exception);
     }
 

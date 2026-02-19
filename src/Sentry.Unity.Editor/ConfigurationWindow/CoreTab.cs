@@ -31,6 +31,11 @@ internal static class CoreTab
             options.CaptureInEditor = EditorGUILayout.Toggle(
                 new GUIContent("Capture In Editor", "Capture errors while running in the Editor."),
                 options.CaptureInEditor);
+
+            options.TreatExceptionsAsHandled = EditorGUILayout.Toggle(
+                new GUIContent("Exceptions as handled", "The SDK marks all exceptions as handled "
+                    + "to not mark sessions as crashed because unity survives and do not crash."),
+                options.TreatExceptionsAsHandled);
         }
 
         EditorGUILayout.Space();

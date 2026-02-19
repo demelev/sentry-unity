@@ -118,6 +118,7 @@ public class ScriptableSentryUnityOptions : ScriptableObject
     [field: SerializeField] public bool FilterBadGatewayExceptions { get; set; } = true;
     [field: SerializeField] public bool FilterWebExceptions { get; set; } = true;
     [field: SerializeField] public bool FilterSocketExceptions { get; set; } = true;
+    [field: SerializeField] public bool TreatExceptionsAsHandled { get; set; } = false;
 
     [field: SerializeField] public bool IosNativeSupportEnabled { get; set; } = true;
     [field: SerializeField] public bool AndroidNativeSupportEnabled { get; set; } = true;
@@ -205,6 +206,7 @@ public class ScriptableSentryUnityOptions : ScriptableObject
             AnrTimeout = TimeSpan.FromMilliseconds(AnrTimeout),
             CaptureFailedRequests = CaptureFailedRequests,
             FilterBadGatewayExceptions = FilterBadGatewayExceptions,
+            TreatExceptionsAsHandled = TreatExceptionsAsHandled,
             IosNativeSupportEnabled = IosNativeSupportEnabled,
             AndroidNativeSupportEnabled = AndroidNativeSupportEnabled,
             NdkIntegrationEnabled = NdkIntegrationEnabled,
