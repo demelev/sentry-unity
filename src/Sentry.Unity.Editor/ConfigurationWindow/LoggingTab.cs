@@ -162,6 +162,12 @@ internal static class LoggingTab
 
             EditorGUI.indentLevel++;
 
+            options.UseSquashingDebouncer = EditorGUILayout.Toggle(
+                new GUIContent("Use advanced log debouncer", "The SDK does not report quickly repeated messages, sends the first one and then the same message with counter."),
+                options.UseSquashingDebouncer);
+
+            var group = new EditorGUILayout.ToggleGroupScope("Use time based debouncer", options.EnableLogDebouncing && !options.UseSquashingDebouncer);
+
             options.DebounceTimeLog = EditorGUILayout.IntField(
                 new GUIContent("Log Debounce [ms]", "The time that has to pass between events of " +
                                                     "LogType.Log before the SDK sends it again."),
@@ -182,6 +188,7 @@ internal static class LoggingTab
             options.DebounceTimeError = Math.Max(0, options.DebounceTimeError);
 
             EditorGUI.indentLevel--;
+            group.Dispose();
             EditorGUILayout.EndToggleGroup();
 #pragma warning restore CS0618 // Type or member is obsolete
         }

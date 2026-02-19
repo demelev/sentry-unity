@@ -17,10 +17,13 @@ internal sealed class TestHub : IHub
     public IReadOnlyList<SentryTransaction> CapturedTransactions => _capturedTransactions;
     public IReadOnlyList<Action<Scope>> ConfigureScopeCalls => _configureScopeCalls;
 
+    public Scope? Scope;
+
     public TestHub(bool isEnabled = true, SentryStructuredLogger? logger = null)
     {
         IsEnabled = isEnabled;
         Logger = logger ?? new TestStructuredLogger();
+        Scope = null;
     }
     public bool IsEnabled { get; }
 
@@ -81,7 +84,11 @@ internal sealed class TestHub : IHub
         return Task.CompletedTask;
     }
 
-    public void ConfigureScope(Action<Scope> configureScope) => _configureScopeCalls.Add(configureScope);
+    public void ConfigureScope(Action<Scope> configureScope)
+    {
+        if (Scope is not null) configureScope.Invoke(Scope);
+        _configureScopeCalls.Add(configureScope);
+    }
     public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg) =>
         ConfigureScope(scope => configureScope.Invoke(scope, arg));
 

@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Sentry.Unity.Integrations;
 
+public delegate void DebouncerCaptureCallback(string message, LogType logType, string stacktrace, bool allowCaptureAsEvent);
+public delegate void DebouncerFunction(string message, LogType logType, string stacktrace, DebouncerCaptureCallback capture);
+
 /// <summary>
 /// Hooks into Unity's `Application.LogMessageReceived` to capture breadcrumbs for Debug log methods
 /// and optionally capture LogError events. Does not handle `Debug.LogException` - exception handling
@@ -55,36 +58,26 @@ internal class UnityApplicationLoggingIntegration : ISdkIntegration
             return;
         }
 
-        // Check deprecated debouncing first (for backwards compatibility)
-        if (IsGettingDebounced(logType))
+#pragma warning disable CS0618 // Type or member is obsolete
+        if (_options?.EnableLogDebouncing is true && _options?.Debouncer != null)
+#pragma warning restore CS0618 // Type or member is obsolete
         {
-            _options.LogDebug("Log message of type '{0}' is getting debounced.", logType);
-            return;
+            _options.Debouncer(message, logType, stacktrace, Capture);
         }
+        else
+        {
+            Capture(message, logType, stacktrace);
+        }
+    }
 
-        ProcessError(message, stacktrace, logType);
+    private void Capture(string message, LogType logType, string stacktrace, bool allowCaptureAsEvent = true)
+    {
+        if (allowCaptureAsEvent)
+            ProcessError(message, stacktrace, logType);
+
         ProcessBreadcrumbs(message, logType);
         ProcessStructuredLog(message, logType);
     }
-
-#pragma warning disable CS0618 // Type or member is obsolete - maintaining backwards compatibility
-    private bool IsGettingDebounced(LogType logType)
-    {
-        if (_options.EnableLogDebouncing is false)
-        {
-            return false;
-        }
-
-        return logType switch
-        {
-            LogType.Exception => !_errorTimeDebounce.Debounced(),
-            LogType.Error or LogType.Assert => !_errorTimeDebounce.Debounced(),
-            LogType.Log => !_logTimeDebounce.Debounced(),
-            LogType.Warning => !_warningTimeDebounce.Debounced(),
-            _ => true
-        };
-    }
-#pragma warning restore CS0618
 
     private void ProcessError(string message, string stacktrace, LogType logType)
     {

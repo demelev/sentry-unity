@@ -69,6 +69,17 @@ public sealed class SentryUnityOptions : SentryOptions
     [Obsolete("Use Throttler instead. This property will be removed in a future version.")]
     public TimeSpan DebounceTimeLog { get; set; } = TimeSpan.FromSeconds(1);
 
+    /// </summary>
+    /// Whether Sentry should report all messages squashing repeating messages and exceptions.
+    /// </summary>
+    public bool UseSquashingDebouncer { get; set; } = false;
+
+    /// <summary>
+    /// Assing a custom debouncer if you need, otherwise the default one
+    /// will be used.
+    /// </summary>
+    public DebouncerFunction? Debouncer { get; set; }
+
     /// <summary>
     /// The time that has to pass between events of LogType.Warning before the SDK sends it again.
     /// </summary>

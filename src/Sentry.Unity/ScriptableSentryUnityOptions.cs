@@ -32,6 +32,7 @@ public class ScriptableSentryUnityOptions : ScriptableObject
 
     [field: SerializeField] public bool EnableErrorEventThrottling { get; set; } = false;
     [field: SerializeField] public int ThrottleDedupeWindow { get; set; } = (int)TimeSpan.FromSeconds(1).TotalMilliseconds;
+    [field: SerializeField] public bool UseSquashingDebouncer { get; set; } = false;
 
     // Deprecated debouncing properties - kept for backwards compatibility
     [field: SerializeField]
@@ -169,6 +170,7 @@ public class ScriptableSentryUnityOptions : ScriptableObject
             CaptureInEditor = CaptureInEditor,
 #pragma warning disable CS0618 // Type or member is obsolete
             EnableLogDebouncing = EnableLogDebouncing,
+            UseSquashingDebouncer = UseSquashingDebouncer,
             DebounceTimeLog = TimeSpan.FromMilliseconds(DebounceTimeLog),
             DebounceTimeWarning = TimeSpan.FromMilliseconds(DebounceTimeWarning),
             DebounceTimeError = TimeSpan.FromMilliseconds(DebounceTimeError),
@@ -225,6 +227,13 @@ public class ScriptableSentryUnityOptions : ScriptableObject
                 [LogType.Error] = StructuredLogOnDebugLogError,
                 [LogType.Exception] = StructuredLogOnDebugLogException
             },
+            Debouncer = UseSquashingDebouncer ? new FlashbackDebouncer().Debounce : new TimeoutDebouncer(
+#pragma warning disable CS0618 // Type or member is obsolete
+                TimeSpan.FromMilliseconds(DebounceTimeLog),
+                TimeSpan.FromMilliseconds(DebounceTimeWarning),
+                TimeSpan.FromMilliseconds(DebounceTimeError)
+#pragma warning restore CS0618 // Type or member is obsolete
+            ).Debounce,
             AddBreadcrumbsWithStructuredLogs = AddBreadcrumbsWithStructuredLogs
         };
 

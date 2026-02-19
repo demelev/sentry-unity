@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Sentry.Unity.Integrations;
 using Sentry.Unity.Tests.Stubs;
@@ -17,6 +18,7 @@ namespace Sentry.Unity.Tests
             {
                 var application = new TestApplication();
                 var integration = new UnityApplicationLoggingIntegration(application, clock: null);
+                Hub.Scope = new Scope(SentryOptions);
                 integration.Register(Hub, SentryOptions);
                 return integration;
             }
@@ -27,10 +29,11 @@ namespace Sentry.Unity.Tests
         [SetUp]
         public void SetUp()
         {
+            var sentryOptions = new SentryUnityOptions();
             _fixture = new Fixture
             {
                 Hub = new TestHub(),
-                SentryOptions = new SentryUnityOptions()
+                SentryOptions = sentryOptions
             };
         }
 
@@ -96,6 +99,33 @@ namespace Sentry.Unity.Tests
             sut.OnLogMessageReceived(message, string.Empty, LogType.Log);
 
             // Both calls should add breadcrumbs (throttling doesn't affect breadcrumbs)
+
+            // First call should capture the event
+            sut.OnLogMessageReceived(message, string.Empty, LogType.Error);
+            Assert.AreEqual(1, _fixture.Hub.CapturedEvents.Count);
+
+            // Second call with same message should be throttled
+            sut.OnLogMessageReceived(message, string.Empty, LogType.Error);
+            Assert.AreEqual(1, _fixture.Hub.CapturedEvents.Count); // Still 1, not 2
+        }
+
+        [Test]
+        [TestCase(LogType.Log)]
+        [TestCase(LogType.Warning)]
+        [TestCase(LogType.Error)]
+        public async void OnLogMessageReceived_LogDebounceEnabled_DebouncesMessage(LogType unityLogType)
+        {
+            _fixture.SentryOptions.Throttler = new ErrorEventThrottler(System.TimeSpan.FromSeconds(10));
+            var sut = _fixture.GetSut();
+            var message = TestContext.CurrentContext.Test.Name;
+
+            sut.OnLogMessageReceived(message, string.Empty, unityLogType);
+            sut.OnLogMessageReceived("Message01", string.Empty, unityLogType);
+            Assert.AreEqual(1, _fixture.Hub.ConfigureScopeCalls.Count);
+
+            await Task.Delay(1100);
+            sut.OnLogMessageReceived("Message01", string.Empty, unityLogType);
+
             Assert.AreEqual(2, _fixture.Hub.ConfigureScopeCalls.Count);
         }
 
@@ -392,5 +422,82 @@ namespace Sentry.Unity.Tests
                 Assert.AreEqual(0, logger.CapturedLogs.Count);
             }
         }
+
+        [Test]
+        [TestCase(LogType.Log)]
+        [TestCase(LogType.Warning)]
+        [TestCase(LogType.Error)]
+        public async void OnLogMessageReceived_LogDebounceEnabled_FlashbackDebouncer(LogType unityLogType)
+        {
+#pragma warning disable CS0618 // Type or member is obsolete
+            _fixture.SentryOptions.EnableLogDebouncing = true;
+            _fixture.SentryOptions.UseSquashingDebouncer = true;
+            var sut = _fixture.GetSut();
+            var message = TestContext.CurrentContext.Test.Name;
+            _fixture.Hub.Scope = new Scope(_fixture.SentryOptions);
+
+            sut.OnLogMessageReceived("OneMessage", string.Empty, unityLogType);
+            sut.OnLogMessageReceived("OneMessage", string.Empty, unityLogType);
+            sut.OnLogMessageReceived("OneMessage", string.Empty, unityLogType);
+            sut.OnLogMessageReceived("Message2", string.Empty, unityLogType);
+
+            await Task.Delay(1100); // Flashback debouncer uses time-based logic internally
+
+            // two breadcrumb for first occurences
+            // and third for repeated messages "OneMessage"
+            Assert.AreEqual(3, _fixture.Hub.Scope.Breadcrumbs.Count);
+        }
+        [Test]
+        public async void OnLogMessageReceived_LogDebounceEnabled_FlashbackDebouncer_DoesNotMissMessages()
+        {
+            _fixture.SentryOptions.EnableLogDebouncing = true;
+            _fixture.SentryOptions.UseSquashingDebouncer = true;
+            var sut = _fixture.GetSut();
+            var message = TestContext.CurrentContext.Test.Name;
+            _fixture.Hub.Scope = new Scope(_fixture.SentryOptions);
+
+            sut.OnLogMessageReceived("OneError", string.Empty, LogType.Error);
+            sut.OnLogMessageReceived("SecondError", string.Empty, LogType.Error);
+
+            sut.OnLogMessageReceived("OneError", string.Empty, LogType.Error);
+            sut.OnLogMessageReceived("SecondError", string.Empty, LogType.Error);
+
+            sut.OnLogMessageReceived("OneError", string.Empty, LogType.Error);
+            sut.OnLogMessageReceived("SecondError", string.Empty, LogType.Error);
+
+            Assert.AreEqual(2, _fixture.Hub.Scope.Breadcrumbs.Count);
+
+            // Wait for the delay to let debouncer report items.
+            await Task.Delay(1100); // Flashback debouncer uses time-based logic internally
+
+            // At this point hub has 4 items, two for first occurances
+            // and two more for repeated messages.
+            Assert.AreEqual(4, _fixture.Hub.Scope.Breadcrumbs.Count);
+        }
+        [Test]
+        public async void OnLogMessageReceived_LogDebounceEnabled_FlashbackDebouncer_FlushWhenNewMessage()
+        {
+            _fixture.SentryOptions.EnableLogDebouncing = true;
+            _fixture.SentryOptions.UseSquashingDebouncer = true;
+            var sut = _fixture.GetSut();
+            var message = TestContext.CurrentContext.Test.Name;
+            _fixture.Hub.Scope = new Scope(_fixture.SentryOptions);
+
+            sut.OnLogMessageReceived("OneError", string.Empty, LogType.Error);
+            sut.OnLogMessageReceived("OneError", string.Empty, LogType.Error);
+            sut.OnLogMessageReceived("OneError", string.Empty, LogType.Error);
+            sut.OnLogMessageReceived("SecondError", string.Empty, LogType.Error);
+            sut.OnLogMessageReceived("SecondError", string.Empty, LogType.Error);
+            sut.OnLogMessageReceived("SecondError", string.Empty, LogType.Error);
+            Assert.AreEqual(3, _fixture.Hub.Scope.Breadcrumbs.Count);
+
+            // Wait for the delay to let debouncer report items.
+            await Task.Delay(1100); // Flashback debouncer uses time-based logic internally
+
+            // At this point hub has 4 items, two for first occurances
+            // and two more for repeated messages.
+            Assert.AreEqual(4, _fixture.Hub.Scope.Breadcrumbs.Count);
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

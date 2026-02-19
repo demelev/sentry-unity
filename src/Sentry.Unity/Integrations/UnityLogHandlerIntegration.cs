@@ -38,7 +38,22 @@ internal sealed class UnityLogHandlerIntegration : ISdkIntegration, ILogHandler
     {
         try
         {
-            ProcessException(exception, context);
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (_options?.EnableLogDebouncing is true && _options?.Debouncer != null)
+#pragma warning restore CS0618 // Type or member is obsolete
+            {
+                string logMessage = exception.Message;
+                string stacktrace = exception.StackTrace;
+                _options.Debouncer(logMessage, LogType.Exception, stacktrace, (string logMessage, LogType logType, string stacktrace, bool allowCaptureAsEvent) =>
+                {
+                    if (allowCaptureAsEvent)
+                        ProcessException(exception, context);
+                });
+            }
+            else
+            {
+                ProcessException(exception, context);
+            }
         }
         finally
         {
