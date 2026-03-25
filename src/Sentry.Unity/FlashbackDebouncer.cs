@@ -9,6 +9,7 @@ namespace Sentry.Unity.Integrations
     public class FlashbackDebouncer
     {
         TimeSpan delay;
+        object sync = new();
 
         public FlashbackDebouncer(int delayMilliseconds = 1000)
         {
@@ -51,7 +52,10 @@ namespace Sentry.Unity.Integrations
 
             if (!entries.TryGetValue(hash, out LogEntry? entry))
             {
-                CaptureAccumulated(entries, capture);
+                lock (sync)
+                {
+                    CaptureAccumulated(entries, capture);
+                }
 
                 entries[hash] = null;
                 capture?.Invoke(message, logType, backtrace, allowCaptureAsEvent: true);
@@ -61,16 +65,21 @@ namespace Sentry.Unity.Integrations
                 while (entries[hash] is LogEntry tailEntry && (tailEntry.Timestamp - DateTime.Now) is { } time && (time.TotalMilliseconds > 100))
                     await Task.Delay(time);
 
-                if (entries[hash] is LogEntry tailEntryCapture)
-                    capture?.Invoke(tailEntryCapture, tailEntryCapture.LogType, tailEntryCapture.Backtrace, allowCaptureAsEvent: false);
-
-                entries.Remove(hash);
+                lock (sync)
+                {
+                    if (entries[hash] is LogEntry tailEntryCapture)
+                        capture?.Invoke(tailEntryCapture, tailEntryCapture.LogType, tailEntryCapture.Backtrace, allowCaptureAsEvent: false);
+                    entries.Remove(hash);
+                }
             }
             else
             {
-                entries[hash] = entry ??= new() { Message = message, LogType = logType, Count = 0, Backtrace = backtrace };
-                entry.Count++;
-                entry.Timestamp = DateTime.Now.Add(delay);
+                lock (sync)
+                {
+                    entries[hash] = entry ??= new() { Message = message, LogType = logType, Count = 0, Backtrace = backtrace };
+                    entry.Count++;
+                    entry.Timestamp = DateTime.Now.Add(delay);
+                }
             }
         }
 
