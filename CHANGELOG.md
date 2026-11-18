@@ -23,6 +23,9 @@
 - Bump CLI from v2.58.4 to v3.1.0 ([#2474](https://github.com/getsentry/sentry-unity/pull/2474))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#310)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.58.4...3.1.0)
+- Bump .NET SDK from v6.0.0 to v7.0.1 ([#583](https://github.com/demelev/sentry-unity/pull/583))
+  - [changelog](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md#701)
+  - [diff](https://github.com/getsentry/sentry-dotnet/compare/6.0.0...7.0.1)
 
 ## 4.0.0
 
